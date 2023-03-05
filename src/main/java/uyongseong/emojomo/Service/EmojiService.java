@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uyongseong.emojomo.domain.Emoji;
+import uyongseong.emojomo.domain.EmojiResult;
 import uyongseong.emojomo.repository.EmojiRepository;
 import uyongseong.emojomo.repository.SearchResultRepository;
 
@@ -46,11 +47,11 @@ public class EmojiService {
         return emojiRepository.findByMean(mean);
     }
 
-    public List<Emoji> searchWords(String str){
+    public List<EmojiResult> searchWords(String str){
 
         List<String> words = splitWords(str);
 
-        List<Emoji> emojiList = findEmojiWithWords(words);
+        List<EmojiResult> emojiList = findEmojiWithWords(words);
 
         searchResultRepository.save(str, emojiList.toString());
 
@@ -70,7 +71,7 @@ public class EmojiService {
 
     public List<String> splitWords(String str){
         str = str.trim();
-        System.out.println("str = " + str);
+
         Komoran komoran = new Komoran(DEFAULT_MODEL.FULL);
 
         KomoranResult analyzeResultList = komoran.analyze(str);
@@ -78,7 +79,7 @@ public class EmojiService {
         List<Token> tokenList = analyzeResultList.getTokenList();
         List<String> words = new ArrayList<>();
 
-        String[] strArray = {"NNG","NNP","NNB","SF","SL","SH","SN"};
+        String[] strArray = {"NNG","NNP","NNB","SL","SH","SN"};
         List<String> strList = new ArrayList<>(Arrays.asList(strArray));
 
         tokenList.forEach(token -> {
@@ -94,15 +95,16 @@ public class EmojiService {
         return words;
     }
     public List<String> splitWords2(String str){
-        System.out.println("str = " + str);
+
         str = str.trim();
-        System.out.println("str = " + str);
+
         Komoran komoran = new Komoran(DEFAULT_MODEL.FULL);
 
         KomoranResult analyzeResultList = komoran.analyze(str);
         List<Token> tokenList = analyzeResultList.getTokenList();
+
         List<String> words = new ArrayList<>();
-        String[] strArray = {"NNG","NNP","NNB","SF","SS","SL","SH","SN"};
+        String[] strArray = {"NNG","NNP","NNB","SL","SH","SN"};
         List<String> strList = new ArrayList<>(Arrays.asList(strArray));
 
         tokenList.forEach(token -> {
@@ -114,15 +116,19 @@ public class EmojiService {
                 }
             }
         });
+
         return words;
     }
 
-    public List<Emoji> findEmojiWithWords(List<String> words){
-        List<Emoji> emojiList = new ArrayList<>();
+    public List<EmojiResult> findEmojiWithWords(List<String> words){
+        List<EmojiResult> emojiList = new ArrayList<>();
+
         words.forEach(word ->{
             List<Emoji> emojis = emojiRepository.findByMeans(word);
             emojis.forEach(emoji -> {
-                emojiList.add(emoji);
+                EmojiResult emojiResult = new EmojiResult(); //결과단어 추가
+                EmojiResult er = emojiResult.createEmojiResult(emoji, word);
+                emojiList.add(er);
                 emoji.addUseCount();
             });
         });

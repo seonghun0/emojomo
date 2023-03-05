@@ -33,11 +33,11 @@ public class EmojiServiceTest {
     public void 검색() throws Exception {
         //given
         String str = "검색 할려하는 얼굴";
-        List<Emoji> emojiList = emojiService.searchWords(str);
+        //List<Emoji> emojiList = emojiService.searchWords(str);
         //when
-        emojiList.forEach(emoji -> {
-            System.out.println("emoji = " + emoji.getEmoji());
-        });
+//        emojiList.forEach(emoji -> {
+//            System.out.println("emoji = " + emoji.getEmoji());
+//        });
         //then
     }
 

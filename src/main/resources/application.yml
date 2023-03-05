@@ -1,5 +1,8 @@
 spring:
   datasource:
+#    url: jdbc:mysql://emoji-database.cmtmhcyqpkt1.us-east-2.rds.amazonaws.com:3306/uyongseong?serverTimezone=Asia/Seoul&createDatabaseIfNotExist=true&useUnicode=true&character_set_server=utf8mb4
+#    username: admin
+#    password: tE3PbzStKoegNaQmZL3y
     url: jdbc:mysql://localhost:3306/uyongseong?serverTimezone=Asia/Seoul&createDatabaseIfNotExist=true&useUnicode=true&character_set_server=utf8mb4
     username: root
     password: mysql
