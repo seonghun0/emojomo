@@ -32,7 +32,9 @@ public class EmojiRepository {
 
     public List<Emoji> findByMeans(String mean){
         return em.createQuery("select e from Emoji e where e_mean Like :e_mean", Emoji.class)
-                .setParameter("e_mean", "%"+mean+"%").getResultList();
+                .setParameter("e_mean", "%"+mean+"%")
+                .setMaxResults(10)
+                .getResultList();
     }
 
 }

@@ -25,7 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "csv")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"https://quickmoji.site", "http://localhost"})
 public class CsvReaderController {
     
     @Autowired

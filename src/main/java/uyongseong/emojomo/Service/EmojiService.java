@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uyongseong.emojomo.domain.Emoji;
 import uyongseong.emojomo.domain.EmojiResult;
+import uyongseong.emojomo.domain.ResultData;
 import uyongseong.emojomo.repository.EmojiRepository;
 import uyongseong.emojomo.repository.SearchResultRepository;
 
+import javax.xml.transform.Result;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,26 +49,15 @@ public class EmojiService {
         return emojiRepository.findByMean(mean);
     }
 
-    public List<EmojiResult> searchWords(String str){
+    public ResultData searchWords(String str){
 
         List<String> words = splitWords(str);
 
-        List<EmojiResult> emojiList = findEmojiWithWords(words);
+        ResultData resultData = findEmojiWithWords(words);
 
-        searchResultRepository.save(str, emojiList.toString());
+        searchResultRepository.save(str, resultData.getEmojiResult().toString());
 
-        return emojiList;
-    }
-
-    public List<String> searchWords2(String str){
-
-        List<String> words = splitWords(str);
-
-        List<String> emojiList = findEmojiWithWords2(words);
-
-        searchResultRepository.save(str, emojiList.toString());
-
-        return emojiList;
+        return resultData;
     }
 
     public List<String> splitWords(String str){
@@ -94,63 +85,36 @@ public class EmojiService {
 
         return words;
     }
-    public List<String> splitWords2(String str){
 
-        str = str.trim();
-
-        Komoran komoran = new Komoran(DEFAULT_MODEL.FULL);
-
-        KomoranResult analyzeResultList = komoran.analyze(str);
-        List<Token> tokenList = analyzeResultList.getTokenList();
-
-        List<String> words = new ArrayList<>();
-        String[] strArray = {"NNG","NNP","NNB","SL","SH","SN"};
-        List<String> strList = new ArrayList<>(Arrays.asList(strArray));
-
-        tokenList.forEach(token -> {
-            if(strList.contains(token.getPos()) && !words.contains(token.getMorph())) {
-                if(token.getPos() == "NNB" && token.getMorph().length() > 1){
-                    words.add(token.getMorph());
-                }else{
-                    words.add(token.getMorph());
-                }
-            }
-        });
-
-        return words;
-    }
-
-    public List<EmojiResult> findEmojiWithWords(List<String> words){
+    public ResultData findEmojiWithWords(List<String> words){
         List<EmojiResult> emojiList = new ArrayList<>();
+        List<String> searchWords = new ArrayList<>();
 
         words.forEach(word ->{
             List<Emoji> emojis = emojiRepository.findByMeans(word);
-            emojis.forEach(emoji -> {
-                EmojiResult emojiResult = new EmojiResult(); //결과단어 추가
-                EmojiResult er = emojiResult.createEmojiResult(emoji, word);
-                emojiList.add(er);
-                emoji.addUseCount();
-            });
-        });
+            if(word.length() == 1 && emojis.size() >= 10){
 
-        return emojiList;
-    }
-
-    public List<String> findEmojiWithWords2(List<String> words){
-        List<String> emojiList = new ArrayList<>();
-        words.forEach(word ->{
-            if(word.length() > 1){
-                List<Emoji> emojis = emojiRepository.findByMeans(word);
+            }else{
                 emojis.forEach(emoji -> {
-                    emojiList.add(emoji.getEmoji() +'/'+ word);
+                    EmojiResult emojiResult = new EmojiResult(); //결과단어 추가
+                    EmojiResult er = emojiResult.createEmojiResult(emoji, word);
+                    searchWords.add(word);
+                    emojiList.add(er);
                     emoji.addUseCount();
                 });
             }
         });
 
-        List<String> newList = emojiList.stream().distinct().collect(Collectors.toList());
+        Set<EmojiResult> set = new LinkedHashSet<>(emojiList);
+        List<EmojiResult> newList = new ArrayList<>(set);
 
-        return newList;
+        Set<String> set2 = new LinkedHashSet<>(searchWords);
+        List<String> newWordList = new ArrayList<>(set2);
+
+        ResultData resultData = new ResultData();
+        resultData = resultData.createResultData(newList, newWordList);
+
+        return resultData;
     }
 
     //jar 파일에서는 사용불가
